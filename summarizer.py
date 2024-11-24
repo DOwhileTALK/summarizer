@@ -36,6 +36,6 @@ def summarize_document(file_path):
     text = text[:max_input_length] if len(text) > max_input_length else text
 
     # Generate the summary using the BART model
-    summary = summarizer_model(text, max_length=530, min_length=100, do_sample=False)
+    summary = summarizer_model(text, max_length=1000, min_length=300, do_sample=False)
     
     return summary[0]['summary_text']
