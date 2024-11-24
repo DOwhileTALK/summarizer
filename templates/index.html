@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Summarizer</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="uploader">
+            <h1>Upload a Document</h1>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".pdf, .docx" required>
+                <button type="submit">Summarize</button>
+            </form>
+        </div>
+        <hr style="color: blue; width: 100%;">
+        <div id="loader" class="hidden">
+            <div class="spinner"></div>
+            <p>Processing your document...</p>
+        </div>
+
+        <div class="result hidden">
+            <h2>Key Points:</h2>
+            <ul id="keyPoints"></ul>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#uploadForm').on('submit', function (e) {
+                e.preventDefault();
+
+                // Hide previous results and show loader
+                $('#loader').removeClass('hidden');  // Show loader
+                $('.result').addClass('hidden');  // Hide result section
+                $('#keyPoints').empty();  // Clear previous key points
+
+                // Prepare form data for the request
+                let formData = new FormData(this);
+
+                // Send the form data via AJAX to the /summarize route
+                $.ajax({
+                    url: '/summarize',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Hide loader and show result section once the response is received
+                        $('#loader').addClass('hidden');  // Hide loader
+                        $('.result').removeClass('hidden');  // Show result section
+
+                        // Check if the summary is present in the response
+                        if (response.summary && response.summary.length > 0) {
+                            response.summary.forEach(point => {
+                                $('#keyPoints').append(`<li>${point}</li>`);
+                            });
+                        } else {
+                            $('#keyPoints').append(`<li>Failed to generate summary.</li>`);
+                        }
+                    },
+                    error: function () {
+                        // Hide loader and show error message in case of failure
+                        $('#loader').addClass('hidden');  // Hide loader
+                        alert('An error occurred while processing the file.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
